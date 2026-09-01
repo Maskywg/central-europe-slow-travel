@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中歐熟齡慢旅 20 日</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏰</text></svg>">
+<meta name="theme-color" content="#7a2231">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #f8f4ef;
+    --card: #ffffff;
+    --border: #e5ddd2;
+    --text: #241a1c;
+    --muted: #6b5a5c;
+    --hint: #a89294;
+    --wine: #7a2231;
+    --wine-light: #f5e6e9;
+    --wine-mid: #dcb3ba;
+    --gold: #93711f;
+    --gold-light: #faf3df;
+    --river: #245f70;
+    --river-light: #e6f1f4;
+    --star-bg: #f5e6e9;
+    --star: #7a2231;
+    --heritage-bg: #e6f1f4;
+    --heritage: #245f70;
+    --optional-bg: #faf3df;
+    --optional: #93711f;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--wine);
+    color: white;
+    padding: 2.5rem 1.5rem 2rem;
+    text-align: center;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.4rem;
+  }
+
+  header p {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    letter-spacing: 0.04em;
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .badge.star { background: var(--star-bg); color: var(--star); }
+  .badge.dot { background: #f0ede8; color: var(--muted); }
+  .badge.heritage { background: var(--heritage-bg); color: var(--heritage); }
+  .badge.optional { background: var(--optional-bg); color: var(--optional); }
+
+  main { max-width: 800px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  /* 資訊卡 */
+  .info-card { max-width: 800px; margin: 1.2rem auto 0; padding: 0 1rem; }
+  .info-card .inner { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .info-head { background: var(--wine); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .info-head-title { color: white; font-size: 14px; font-weight: 500; }
+  .info-head-sub { color: rgba(255,255,255,0.75); font-size: 11px; margin-top: 2px; }
+  .info-chevron { color: rgba(255,255,255,0.8); font-size: 12px; transition: transform .25s; }
+  .info-body { display: none; padding: 14px 16px; }
+  .info-body.open { display: block; }
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 10px; margin-bottom: 14px; }
+  .info-tile { background: var(--wine-light); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .info-tile .k { font-size: 10px; color: var(--wine); letter-spacing: 0.06em; margin-bottom: 3px; }
+  .info-tile .v { font-size: 13px; color: var(--text); font-weight: 500; line-height: 1.5; }
+  .feature-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .feature-item { display: flex; gap: 8px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .feature-item b { color: var(--text); }
+  .section-title { font-size: 11px; font-weight: 500; color: var(--hint); letter-spacing: 0.08em; text-transform: uppercase; margin: 14px 0 6px; }
+  .section-title:first-child { margin-top: 0; }
+  .hotel-tier { background: var(--gold-light); border-radius: var(--radius-sm); padding: 9px 11px; margin-bottom: 7px; }
+  .hotel-tier:last-child { margin-bottom: 0; }
+  .hotel-tier .name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .hotel-tier .desc { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.6; }
+
+  .day-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.2s; }
+  .day-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+  .day-header { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; user-select: none; transition: background 0.15s; }
+  .day-header:hover { background: #faf8f5; }
+
+  .day-num { background: var(--wine-light); color: var(--wine); border-radius: var(--radius-sm); font-size: 11px; font-weight: 500; padding: 3px 8px; white-space: nowrap; min-width: 46px; text-align: center; flex-shrink: 0; }
+
+  .flag { font-size: 14px; flex-shrink: 0; }
+  .day-title-wrap { flex: 1; min-width: 0; }
+  .day-zh { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .day-en { font-size: 11px; color: var(--hint); margin-top: 1px; }
+  .day-country { font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+  .chevron { font-size: 10px; color: var(--hint); transition: transform 0.25s; flex-shrink: 0; }
+  .chevron.open { transform: rotate(90deg); }
+
+  .day-body { display: none; padding: 0 16px 14px; border-top: 1px solid var(--border); }
+  .day-body.open { display: block; }
+
+  .section { margin-top: 12px; }
+  .section-label { font-size: 10px; font-weight: 500; color: var(--hint); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 7px; }
+
+  .spots { display: flex; flex-direction: column; gap: 8px; }
+  .spot-item { display: flex; flex-direction: column; gap: 4px; }
+  .spot-tag { font-size: 12px; padding: 4px 10px; border-radius: 20px; display: inline-block; line-height: 1.5; max-width: fit-content; }
+  .spot-tag.star { background: var(--star-bg); color: var(--star); }
+  .spot-tag.heritage { background: var(--heritage-bg); color: var(--heritage); }
+  .spot-tag.optional { background: var(--optional-bg); color: var(--optional); }
+  .spot-tag.dot { background: #f0ede8; color: var(--text); border: 1px solid var(--border); }
+
+  .link-row { display: flex; gap: 5px; flex-wrap: wrap; padding-left: 4px; }
+  .link-btn { font-size: 11px; padding: 2px 9px; border-radius: 20px; text-decoration: none; border: 1px solid var(--border); color: var(--muted); background: white; transition: all 0.15s; }
+  .link-btn:hover { background: var(--bg); color: var(--text); border-color: var(--hint); }
+  .link-btn.official { background: var(--wine-light); color: var(--wine); border-color: var(--wine-mid); }
+  .link-btn.official:hover { background: var(--wine-mid); }
+
+  .meal-row { display: flex; gap: 16px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+  .meal-item { display: flex; gap: 5px; align-items: flex-start; }
+  .meal-label { font-weight: 500; color: var(--hint); font-size: 11px; flex-shrink: 0; }
+
+  .hotel { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .note { font-size: 12px; color: var(--muted); margin-top: 10px; padding: 8px 11px; background: #faf8f5; border-radius: var(--radius-sm); border-left: 3px solid var(--wine-mid); line-height: 1.7; }
+  .note b { color: var(--text); }
+
+  .day-map { height: 260px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
+
+  footer { text-align: center; padding: 2rem; font-size: 12px; color: var(--hint); }
+
+  /* 特產區塊 */
+  .shopping-section { margin-top: 12px; background: #fffdf7; border: 1px solid #e8dfc8; border-radius: var(--radius-sm); padding: 10px 12px; }
+  .shopping-title { font-size: 11px; font-weight: 500; color: #8a6c2a; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .shopping-grid { display: flex; flex-direction: column; gap: 6px; }
+  .shopping-item { display: flex; flex-direction: column; gap: 2px; }
+  .shopping-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .shopping-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .shopping-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-right: 3px; margin-bottom: 2px; }
+  .tag-food { background: #fef3e2; color: #9a5c00; border: 1px solid #f5d9a0; }
+  .tag-brand { background: #e8f0f8; color: #1a4a7a; border: 1px solid #b8d0e8; }
+  .tag-souvenir { background: #f0edf8; color: #5a3a8a; border: 1px solid #cfc0e8; }
+
+  /* 匯率卡 */
+  .rate-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 10px; }
+  .rate-card:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>中歐熟齡慢旅 20 日</h1>
+  <p>布拉格 7 天 ・ 維也納 7 天 ・ 布達佩斯 6 天｜50+ 不崩潰的優雅慢節奏</p>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><span class="badge star">★ 必訪</span> 重點景點</div>
+  <div class="legend-item"><span class="badge dot">◎ 順遊</span> 沿途風光 / 短暫停留</div>
+  <div class="legend-item"><span class="badge heritage">🌏 世界遺產</span> 瓦豪河谷所在</div>
+  <div class="legend-item"><span class="badge optional">💰 建議預約</span> 需事先訂票 / 提前預約</div>
+</div>
+
+<!-- 核心策略 -->
+<div class="info-card">
+  <div class="inner">
+    <div class="info-head" onclick="var b=document.getElementById('stratb');var c=document.getElementById('stratc');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'rotate(90deg)':''">
+      <div>
+        <div class="info-head-title">📋 中歐慢旅核心策略</div>
+        <div class="info-head-sub">50+ 熟齡族設計・點開查看完整攻略邏輯</div>
+      </div>
+      <span class="info-chevron" id="stratc">▶</span>
+    </div>
+    <div class="info-body" id="stratb">
+      <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px">
+        路線：<b style="color:var(--text)">台灣直飛布拉格 → 火車到維也納 → 火車到布達佩斯 → 回維也納搭直飛班機返台</b>。三座城市各住好幾晚，中途不天天換飯店、不天天拖行李，用最省力的方式完成一趟優雅的中歐自由行。
+      </div>
+      <div class="feature-list">
+        <div class="feature-item">🏨 <span><b>一城一飯店，7 天不換房</b>：飯店選在舊城區附近但不住最吵的觀光心臟地帶，白天景點步行圈內、晚上睡得安穩</span></div>
+        <div class="feature-item">🦵 <span><b>能搭車就不走樓梯</b>：布拉格城堡搭 22 號電車直達、熊布朗宮搭小火車登頂、城堡山搭百年纜車，把體力留給真正的景點</span></div>
+        <div class="feature-item">🌅 <span><b>景點早起晚去</b>：查理大橋建議早上 6–7 點造訪，避開下午人潮，也讓一整天心情更穩定</span></div>
+        <div class="feature-item">⛴ <span><b>能坐船就不走路</b>：伏爾塔瓦河遊船、多瑙河遊船、瓦豪河谷遊船，坐著就能把最好的風景收進眼底</span></div>
+        <div class="feature-item">😴 <span><b>安排體力回補日</b>：連續高強度行程後（如去完庫特納霍拉隔天、逛完宮殿隔天），安排睡到自然醒、午睡、看場歌劇的緩衝日</span></div>
+        <div class="feature-item">🎟 <span><b>熱門景點先線上訂票</b>：熊布朗宮、匈牙利國會大廈都建議提前在官網預約時段，現場排隊往往要 1–2 小時</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 飯店選擇 -->
+<div class="info-card">
+  <div class="inner">
+    <div class="info-head" style="background:var(--gold)" onclick="var b=document.getElementById('hotelb');var c=document.getElementById('hotelc');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'rotate(90deg)':''">
+      <div>
+        <div class="info-head-title">🏨 三城飯店選擇（各 3 個價位參考）</div>
+        <div class="info-head-sub">原則：離舊城區不遠，但不住最吵的觀光心臟地帶</div>
+      </div>
+      <span class="info-chevron" id="hotelc">▶</span>
+    </div>
+    <div class="info-body" id="hotelb">
+      <div class="section-title">🇨🇿 布拉格（7 晚）</div>
+      <div class="hotel-tier"><div class="name">布拉格大都會飯店</div><div class="desc">五星精品，位於安靜小巷，遠離舊城廣場喧囂但步行仍快速，床墊與隔音評價高，重視睡眠品質的首選</div></div>
+      <div class="hotel-tier"><div class="name">克萊門特飯店</div><div class="desc">溫馨四星，距伏爾塔瓦河僅幾步，員工友善、樂於分享在地建議，早餐評價高</div></div>
+      <div class="hotel-tier"><div class="name">布拉格一號飯店</div><div class="desc">三星連鎖但硬體品質穩定，樓下有超市與藥妝店，走路 5 分鐘到巴士總站和火車站，CP 值高</div></div>
+
+      <div class="section-title">🇦🇹 維也納（7 晚）</div>
+      <div class="hotel-tier"><div class="name">維也納無憂宮飯店</div><div class="desc">位於博物館區旁、第一區邊界，避開最擁擠的購物人潮，附設室內泳池與 SPA，適合下午回房做水療恢復體力</div></div>
+      <div class="hotel-tier"><div class="name">凱薩霍夫飯店</div><div class="desc">質感與服務優、價格更親民，早餐評價高</div></div>
+      <div class="hotel-tier"><div class="name">維也納國家劇院一號飯店</div><div class="desc">設計現代、交通方便，性價比高的選擇</div></div>
+
+      <div class="section-title">🇭🇺 布達佩斯（6 晚）</div>
+      <div class="hotel-tier"><div class="name">DA Hotel</div><div class="desc">位於市中心，走到多瑙河僅 2 分鐘，房間乾淨、設計現代，高 CP 值，適合把預算留給美食的旅客</div></div>
+      <div class="hotel-tier"><div class="name">Hotel Moments Budapest</div><div class="desc">中價位高質感，位在有「布達佩斯香榭大道」之稱的安德拉什大街上，建築本身就是古蹟，早餐豐富</div></div>
+      <div class="hotel-tier"><div class="name">Aria Hotel Budapest</div><div class="desc">音樂主題五星精品，頂樓酒吧可眺望聖史蒂芬教堂，適合周年紀念或犒賞自己</div></div>
+
+      <div style="font-size:11px;color:var(--hint);margin-top:10px;line-height:1.6">三城飯店都建議定在市中心平坦區域：布拉格舊城區周邊、維也納第一區內城區、布達佩斯地勢平坦的佩斯區——不用推行李爬坡，主要景點與餐廳都在步行範圍內。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 交通攻略 -->
+<div class="info-card">
+  <div class="inner">
+    <div class="info-head" style="background:var(--river)" onclick="var b=document.getElementById('transb');var c=document.getElementById('transc');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'rotate(90deg)':''">
+      <div>
+        <div class="info-head-title">🚇 三城交通攻略 + 城際移動</div>
+        <div class="info-head-sub">對膝蓋與腰部最溫柔的交通選擇</div>
+      </div>
+      <span class="info-chevron" id="transc">▶</span>
+    </div>
+    <div class="info-body" id="transb">
+      <div class="section-title">🇨🇿 布拉格市區</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+        機場進市區：首選 Bolt 或 Uber，約 30 分鐘、新台幣 600–850 元，不用扛行李上下地鐵；想省錢可搭每 30 分鐘一班的機場快線到火車站。市區移動下載 <b style="color:var(--text)">PID App</b>，直接買一張 72 小時票就能隨意搭電車、地鐵不用找售票機。<b style="color:var(--text)">65 歲以上長輩搭大眾運輸完全免費</b>，隨身帶護照備查即可。
+      </div>
+      <div class="section-title">🇦🇹 維也納市區</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+        大眾運輸發達，但熟齡旅客建議<b style="color:var(--text)">以電車為主、地鐵為輔</b>——地鐵雖快但大站內要走很長的路找電梯，路面電車站點就在街道上，跨一步就能上車、窗外風景也好。停留 7 天建議直接買<b style="color:var(--text)">維也納 7 天交通票（約 €25）</b>，涵蓋核心區地鐵、電車、巴士無限次搭乘。
+      </div>
+      <div class="section-title">🇭🇺 布達佩斯市區</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:10px">
+        下載官方 <b style="color:var(--text)">Budapest GO App</b> 直接買多日交通券，上車刷手機即可，不用找售票機。
+      </div>
+      <div class="section-title">城際移動</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8">
+        布拉格 → 維也納：火車約 4 小時，建議在奧地利國鐵（ÖBB）或 RegioJet 官網提早買點對點單程票，選靠窗座位。<br>
+        維也納 → 布達佩斯：搭 Railjet。<br>
+        瓦豪河谷一日遊：ÖBB 推出的套票約 €77／人，含維也納↔梅爾克火車票、梅爾克↔克雷姆斯多瑙河遊船票、克雷姆斯↔維也納火車票，以及梅爾克修道院門票，一票到底比分開買便宜。<br>
+        布達佩斯 → 台灣：無直飛班機，搭 Railjet 約 2.5 小時回維也納中央車站，同站轉機場快線 15 分鐘抵達機場，再搭直飛班機返台。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 即時匯率區塊 -->
+<div style="max-width:800px;margin:0.8rem auto 0;padding:0 1rem" id="rate-wrap"></div>
+
+<script>
+const CURRENCIES = [
+  { code: 'CZK', flag: '🇨🇿', name: '捷克克朗 (CZK)', note: '布拉格使用', color: '#7a2231' },
+  { code: 'EUR', flag: '🇦🇹', name: '歐元 (EUR)', note: '維也納使用', color: '#93711f' },
+  { code: 'HUF', flag: '🇭🇺', name: '匈牙利福林 (HUF)', note: '布達佩斯使用', color: '#245f70' },
+];
+const QUICK_AMOUNTS = { CZK: [50, 100, 500, 1000], EUR: [1, 5, 10, 50], HUF: [500, 1000, 5000, 10000] };
+
+async function fetchOneRate(code) {
+  try {
+    const r = await fetch('https://api.frankfurter.app/latest?from=TWD&to=' + code);
+    if (r.ok) { const d = await r.json(); if (d.rates && d.rates[code]) return d.rates[code]; }
+  } catch(e) {}
+  try {
+    const r = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/twd.json');
+    if (r.ok) { const d = await r.json(); const k = code.toLowerCase(); if (d.twd && d.twd[k]) return d.twd[k]; }
+  } catch(e) {}
+  return null;
+}
+
+async function fetchRates() {
+  const wrap = document.getElementById('rate-wrap');
+  wrap.innerHTML = CURRENCIES.map(c => `<div class="rate-card" id="rate-${c.code}"><div style="padding:14px;color:var(--hint);font-size:12px;text-align:center">載入中...</div></div>`).join('');
+
+  for (const c of CURRENCIES) {
+    const rate = await fetchOneRate(c.code); // 1 TWD = ? foreign
+    const el = document.getElementById('rate-' + c.code);
+    if (!rate) { el.innerHTML = `<div style="padding:14px;color:#c0392b;font-size:12px;text-align:center">${c.name} 匯率載入失敗</div>`; continue; }
+    const perForeign = 1 / rate; // 1 foreign = ? TWD
+    const per100TWD = (100 * rate).toFixed(code_decimals(c.code));
+    const quickRows = QUICK_AMOUNTS[c.code].map(amt => {
+      const twd = (amt * perForeign).toFixed(1);
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f5f3ef">
+        <span style="color:#6b5a5c">${c.code} ${amt.toLocaleString()}</span>
+        <span style="font-weight:500;color:#241a1c">≈ NT$ ${Number(twd).toLocaleString()}</span>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div style="background:${c.color};padding:8px 12px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">${c.flag}</span>
+          <div>
+            <div style="color:white;font-size:13px;font-weight:500">${c.name}</div>
+            <div style="color:rgba(255,255,255,0.75);font-size:10px">${c.note}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="color:white;font-size:16px;font-weight:600">NT$ ${perForeign.toFixed(3)}</div>
+          <div style="color:rgba(255,255,255,0.75);font-size:10px">= 1 ${c.code}</div>
+        </div>
+      </div>
+      <div style="padding:8px 12px;background:#fafaf8">
+        <div style="font-size:10px;color:#a89294;margin-bottom:5px;letter-spacing:0.04em">快速換算</div>
+        ${quickRows}
+        <div style="display:flex;justify-content:space-between;padding:4px 0;margin-top:2px">
+          <span style="color:#6b5a5c;font-size:11px">NT$ 100</span>
+          <span style="font-weight:500;font-size:11px;color:${c.color}">≈ ${c.code} ${per100TWD}</span>
+        </div>
+      </div>
+      <div style="padding:6px 12px 10px">
+        <div style="font-size:10px;color:#a89294;margin-bottom:4px">自訂金額</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="color:#6b5a5c;font-size:12px">${c.code}</span>
+          <input type="number" placeholder="輸入金額" oninput="calcTWD(this, ${perForeign}, '${c.code}')"
+            style="flex:1;border:1px solid #ddd;border-radius:6px;padding:5px 8px;font-size:12px;outline:none;min-width:0">
+          <span style="color:#a89294;font-size:12px">=</span>
+          <span class="twd-result-${c.code}" style="color:${c.color};font-weight:500;font-size:13px;min-width:70px;text-align:right">NT$ —</span>
+        </div>
+      </div>`;
+  }
+}
+
+function code_decimals(code) { return code === 'HUF' ? 0 : 1; }
+
+function calcTWD(input, rate, code) {
+  const val = parseFloat(input.value);
+  const el = document.querySelector('.twd-result-' + code);
+  if (!el) return;
+  if (isNaN(val) || input.value === '') { el.textContent = 'NT$ —'; }
+  else { el.textContent = 'NT$ ' + (val * rate).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+}
+
+fetchRates();
+</script>
+
+<main id="app"></main>
+
+<footer>行程參考來源：YouTube《50+歐洲不崩潰旅行｜中歐20天這樣走真的超省力》Jane Travel 我的任意門・景點連結為 Google 地圖搜尋・地圖座標為概略位置僅供參考</footer>
+
+<script>
+function gmaps(q) {
+  return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+}
+
+const HOTEL_PRAGUE = "布拉格大都會飯店 ／ 克萊門特飯店 ／ 布拉格一號飯店";
+const HOTEL_VIENNA = "維也納無憂宮飯店 ／ 凱薩霍夫飯店 ／ 維也納國家劇院一號飯店";
+const HOTEL_BUDAPEST = "DA Hotel ／ Hotel Moments Budapest ／ Aria Hotel Budapest";
+
+const days = [
+  {
+    n: 1, zh: "抵達布拉格・安頓時差", en: "Arrival in Prague", country: "捷克", flag: "🇨🇿",
+    spots: [
+      { n: "◎伏爾塔瓦河岸散步賞夕陽 Vltava Riverbank", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Vltava riverbank Prague") }] },
+    ],
+    mapSpots: [{ name: "伏爾塔瓦河岸 Vltava Riverbank", lat: 50.0850, lon: 14.4130 }],
+    meals: { 早: "—", 午: "—", 晚: "傑克家常菜料理（Jak Doma，捷克家常菜＋在地黑啤酒）" },
+    hotel: HOTEL_PRAGUE,
+    note: "第一天別急著排行程，長途飛行最怕一下飛機就逼自己趕路。今天只做兩件事：<b>check in</b> 與<b>熟悉附近環境</b>——找到超市、藥妝店、最近的電車站走一圈，你會安心很多。晚餐前到伏爾塔瓦河岸散步看夕陽，讓身心調整到慢旅的節奏，這就是布拉格最溫柔的開場。"
+  },
+  {
+    n: 2, zh: "舊城廣場・天文鐘・帝國咖啡館", en: "Old Town Square & Café Imperial", country: "捷克", flag: "🇨🇿",
+    spots: [
+      { n: "★舊城廣場 Old Town Square（石板路平坦好走）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Old Town Square Prague") }] },
+      { n: "★天文鐘 Astronomical Clock（整點前10分鐘卡位看十二使徒轉動）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Prague Astronomical Clock") }] },
+      { n: "◎火藥塔 Powder Tower（布拉格古城門遺址）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Powder Tower Prague") }] },
+      { n: "◎市民會館 Municipal House（與火藥塔一黑一白視覺張力強）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Municipal House Prague") }] },
+      { n: "★帝國咖啡館 Café Imperial（世界十大最美咖啡廳之一，滿牆馬賽克瓷磚）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Cafe Imperial Prague") }] },
+    ],
+    mapSpots: [
+      { name: "舊城廣場 Old Town Square", lat: 50.0870, lon: 14.4207 },
+      { name: "火藥塔 Powder Tower", lat: 50.0871, lon: 14.4285 },
+      { name: "市民會館 Municipal House", lat: 50.0877, lon: 14.4291 },
+      { name: "帝國咖啡館 Café Imperial", lat: 50.0906, lon: 14.4306 },
+    ],
+    meals: { 早: "飯店早餐", 午: "自理（舊城區周邊）", 晚: "帝國咖啡館（推薦紅酒燉牛頰肉，肉質軟嫩到輕輕一撥就開）" },
+    hotel: HOTEL_PRAGUE,
+    note: "今天核心是舊城區，全程平坦石板路。看個鐘、逛個塔、吃頓好餐，行程就是這麼簡單——全平坦的路面讓膝蓋完全零負擔。"
+  },
+  {
+    n: 3, zh: "庫特納霍拉一日遊・人骨教堂", en: "Kutná Hora Day Trip", country: "捷克", flag: "🇨🇿",
+    spots: [
+      { n: "★塞德萊茨人骨教堂 Sedlec Ossuary（用四萬人骨骸裝飾，莊嚴而非陰森）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Sedlec Ossuary Kutna Hora") }] },
+      { n: "★聖芭芭拉教堂 St. Barbara's Church（為守護礦工而建，哥德式飛扶壁如皇冠）", type: "star", links: [{ t: "📍 地圖", u: gmaps("St Barbara's Church Kutna Hora") }] },
+      { n: "◎景觀平台（俯瞰城鎮全景，路面平整好走）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Kutna Hora viewpoint") }] },
+    ],
+    mapSpots: [
+      { name: "人骨教堂 Sedlec Ossuary", lat: 49.9564, lon: 15.2740 },
+      { name: "聖芭芭拉教堂 St. Barbara's Church", lat: 49.9469, lon: 15.2611 },
+    ],
+    meals: { 早: "飯店早餐", 午: "Dačického 餐廳（波西米亞烤肉拼盤：捷克酸菜、烤肉、麵團子，約台幣650元，份量十足）", 晚: "自理（返回布拉格）" },
+    hotel: HOTEL_PRAGUE,
+    note: "第三天先離開布拉格，去程度較低的世界遺產小鎮練膽——這是<b>信心建立日</b>。搭火車只要50–70分鐘、直達班次多，先練習在捷克搭火車看看板，後面挑戰CK小鎮才有底氣。人骨教堂與市中心相距約2公里、路面有起伏，建議回車站搭802路公車或當地黃色觀光小巴到聖芭芭拉教堂附近，把體力留給精華景點。下午3–4點左右就能悠閒搭火車回布拉格。"
+  },
+  {
+    n: 4, zh: "體力回補日・清晨查理大橋・遊船", en: "Recovery Day · Charles Bridge & Cruise", country: "捷克", flag: "🇨🇿",
+    spots: [
+      { n: "★查理大橋 Charles Bridge（建議早上6–7點造訪，沒有嘈雜攤販，可獨占中世紀浪漫）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Charles Bridge Prague") }] },
+      { n: "★伏爾塔瓦河遊船 Vltava River Cruise（坐著看查理大橋拱門從頭頂掠過）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Vltava river cruise dock Prague") }] },
+      { n: "◎小城區 Malá Strana（比舊城區更幽靜、更有文藝氣息）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Mala Strana Prague") }] },
+      { n: "★Angelato 冰淇淋（號稱布拉格第一，推薦開心果口味，兩球約台幣150元）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Angelato Prague") }] },
+    ],
+    mapSpots: [
+      { name: "查理大橋 Charles Bridge", lat: 50.0865, lon: 14.4114 },
+      { name: "小城區 Malá Strana", lat: 50.0875, lon: 14.4045 },
+    ],
+    meals: { 早: "飯店早餐（早起前先簡單墊胃）", 午: "回飯店午睡補充體力，午餐自理", 晚: "自理＋Angelato冰淇淋" },
+    hotel: HOTEL_PRAGUE,
+    note: "昨天去了庫特納霍拉，明天要迎接大魔王CK小鎮，今天定義為<b>體力回補日</b>——只感受布拉格最安靜溫柔的一面。早起的鳥兒有蟲吃，早起的人兒有美景看：這份安靜會讓一整天心情都很穩定。中午回飯店睡個回籠覺，下午用最不費力的方式看布拉格——搭遊船，不用走路，只需吹著微風看兩岸紅屋頂。下船後漫步到河對岸的小城區，逛累了就去吃Angelato。"
+  },
+  {
+    n: 5, zh: "童話小鎮CK庫倫洛夫一日遊", en: "Český Krumlov Day Trip", country: "捷克", flag: "🇨🇿",
+    spots: [
+      { n: "★城堡花園（從海拔最高處開始一路向下散步，全程不用爬坡）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Český Krumlov Castle Garden") }] },
+      { n: "◎城堡守護熊 Castle Bear Moat（護城河裡的當地傳統）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Český Krumlov Castle Bear Moat") }] },
+      { n: "★斗篷橋 Cloak Bridge（三層石拱連接城堡與劇院，橋上窗框是天然畫框）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Plášťový most Český Krumlov") }] },
+      { n: "★洞穴餐廳（舊監獄改建，粗獷岩石牆＋柴火烤爐，務必提前預約）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Krcma v Satlavske Cesky Krumlov") }] },
+    ],
+    mapSpots: [
+      { name: "城堡花園 Castle Garden", lat: 48.8130, lon: 14.3210 },
+      { name: "斗篷橋 Cloak Bridge", lat: 48.8112, lon: 14.3140 },
+      { name: "城堡守護熊護城河", lat: 48.8113, lon: 14.3151 },
+    ],
+    meals: { 早: "飯店早餐", 午: "洞穴餐廳（現烤大塊豬腳與香腸，中世紀豪邁氛圍，一位難求務必提前預約）", 晚: "自理（返回布拉格路上）" },
+    hotel: HOTEL_PRAGUE,
+    note: "今天出城千萬別搭火車（要轉車太累），推薦搭 <b>RegioJet 巴士</b>，從布拉格發車三小時直達小鎮入口。CK小鎮自18世紀以來建築外觀幾乎沒變過，走進去像撕開一本中世紀童話繪本，但滿地古老石板路對50+膝蓋是負擔。省力秘訣：搭車時直接定位到最頂端的<b>城堡花園</b>下車，從海拔最高處開始一路向下散步——視野向下俯瞰、風景最美，還完全不用爬坡。"
+  },
+  {
+    n: 6, zh: "布拉格城堡・聖維特大教堂・黃金巷", en: "Prague Castle & St. Vitus Cathedral", country: "捷克", flag: "🇨🇿",
+    spots: [
+      { n: "★聖維特大教堂 St. Vitus Cathedral（慕夏設計的花窗玻璃，陽光灑進時美到屏息）", type: "star", links: [{ t: "📍 地圖", u: gmaps("St Vitus Cathedral Prague") }] },
+      { n: "★黃金巷 Golden Lane（曾是煉金術士居所，也是卡夫卡寫作之處）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Golden Lane Prague Castle") }] },
+    ],
+    mapSpots: [
+      { name: "布拉格城堡 Prague Castle", lat: 50.0909, lon: 14.4009 },
+      { name: "黃金巷 Golden Lane", lat: 50.0917, lon: 14.4021 },
+    ],
+    meals: { 早: "飯店早餐", 午: "Cooking 餐廳（城堡出口旁，捷克燉牛肉配白酒，約台幣900元，坐擁紅屋頂全景）", 晚: "自理（沿斜坡散步下山途中）" },
+    hotel: HOTEL_PRAGUE,
+    note: "全世界最大古堡群，光樓梯就上百階——今天的策略只有四個字：<b>搭車攻頂</b>。請記住黃金號碼 <b>22號電車</b>，布拉格最美的觀光路線，直接坐到布拉格城堡站，一出站就在城堡正門口，省下至少30分鐘的奪命爬坡路。吃飽喝足後不搭車，沿著布拉格視野最好的斜坡緩緩走下山，一邊看夕陽染紅整座城市，一邊輕鬆散步回小城區。"
+  },
+  {
+    n: 7, zh: "布拉格 → 維也納・火車移動日", en: "Prague → Vienna by Train", country: "捷克→奧地利", flag: "🇨🇿→🇦🇹",
+    spots: [
+      { n: "◎電車環城一圈，與城市初步建立連結", type: "dot", links: [] },
+    ],
+    mapSpots: [
+      { name: "維也納舊城區 Vienna Innere Stadt", lat: 48.2082, lon: 16.3738 },
+    ],
+    meals: { 早: "飯店早餐（悠閒吃完再出發）", 午: "火車上／抵達維也納後自理", 晚: "Figlmüller 費格繆勒餐廳（傳奇比臉還大的炸豬排）" },
+    hotel: HOTEL_VIENNA,
+    note: "今天早上悠閒吃完早餐，搭上火車前往音樂之都維也納。建議直接在奧地利國鐵或 RegioJet 官網購買點對點單程票，早買早選靠窗座位，確保一趟安穩舒適的車程。約4小時就能從布拉格的童話氛圍無縫接軌來到維也納。抵達後第一天不特別安排行程，check in、附近走走熟悉環境、買一張維也納7天交通票，坐上1號或2號路面電車環城一圈，看著窗外經典地標略過，先與這座城市建立連結。"
+  },
+  {
+    n: 8, zh: "舊城核心・聖史蒂芬大教堂・中央咖啡館", en: "Stephansdom & Café Central", country: "奧地利", flag: "🇦🇹",
+    spots: [
+      { n: "★聖史蒂芬主教座堂 Stephansdom（維也納地標，哈布斯堡雙頭鷲琉璃瓦拼花屋頂）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Stephansdom Vienna") }] },
+      { n: "★格拉本大街 Graben（平坦好走，中央黑死病紀念柱必看）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Graben Vienna") }] },
+      { n: "★中央咖啡館 Café Central（世界十大最美咖啡館之一，1876年開業，詩人蠟像坐鎮）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Cafe Central Vienna") }] },
+    ],
+    mapSpots: [
+      { name: "聖史蒂芬主教座堂 Stephansdom", lat: 48.2085, lon: 16.3731 },
+      { name: "格拉本大街 Graben", lat: 48.2088, lon: 16.3706 },
+      { name: "中央咖啡館 Café Central", lat: 48.2098, lon: 16.3658 },
+    ],
+    meals: { 早: "飯店早餐", 午: "中央咖啡館下午茶（招牌皇帝煎餅 Kaiserschmarrn，份量大，建議兩人分食）", 晚: "自理" },
+    hotel: HOTEL_VIENNA,
+    note: "教堂建議走<b>北塔搭電梯</b>（只要幾十秒直達普梅林大鐘旁的觀景台），千萬別跟大多數遊客去挑戰南塔那343階又窄又陡的旋轉樓梯，保護好膝蓋。今天的節奏：一個教堂、一段街道、一間咖啡館，沒有萬步走，只有深深的感動。"
+  },
+  {
+    n: 9, zh: "熊布朗宮（美泉宮）", en: "Schönbrunn Palace", country: "奧地利", flag: "🇦🇹",
+    spots: [
+      { n: "★熊布朗宮 Grand Tour（參觀40個房間，奢華的大廳與敬廳）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Schönbrunn Palace Vienna") }] },
+      { n: "★皇家花園（典型法式對稱園林，搭全景小火車登頂完全不費腿力）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Schönbrunn Palace Garden") }] },
+      { n: "◎凱旋門 Gloriette（山頂觀景建築，曾是皇室早餐室）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Gloriette Schönbrunn") }] },
+    ],
+    mapSpots: [{ name: "熊布朗宮 Schönbrunn Palace", lat: 48.1858, lon: 16.3122 }],
+    meals: { 早: "飯店早餐", 午: "自理（宮內無座位，建議先在花園長椅坐坐或結束後立刻找咖啡館休息）", 晚: "Plachutta 清燉牛肉老字號（近市立公園，牛腱骨髓慢火清燉，配蘋果泥或辣根醬）" },
+    hotel: HOTEL_VIENNA,
+    note: "曾是哈布斯堡皇室的夏宮，也是莫札特6歲時為女皇演奏的地方。<b>務必提前在官網預約入場時段</b>，能免去排隊1–2小時的痛苦。花園非常大，從宮殿走到山頂凱旋門是長距離上坡，善用黃色<b>全景小火車</b>在幾個重點站隨意上下，完全不費腿力就能登頂看全景。交通可搭地鐵U4線在熊布朗宮站下車，或路面電車10號、60號，最省力則是直接叫Uber或Bolt。"
+  },
+  {
+    n: 10, zh: "霍夫堡皇宮・西西公主博物館", en: "Hofburg Palace", country: "奧地利", flag: "🇦🇹",
+    spots: [
+      { n: "★西西公主博物館 Sisi Museum（透過私人遺物了解這位傳奇皇后）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Sisi Museum Hofburg Vienna") }] },
+      { n: "◎銀器收藏館（可快速瀏覽，把體力留給更有故事性的展館）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Hofburg Silver Collection") }] },
+      { n: "◎皇家府邸（法朗兹約瑟夫皇帝與西西公主的起居室）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Hofburg Imperial Apartments") }] },
+      { n: "★奧地利國家圖書館（世界最美圖書館之一，巴洛克穹頂＋20萬冊古籍）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Austrian National Library Vienna") }] },
+    ],
+    mapSpots: [
+      { name: "霍夫堡皇宮 Hofburg", lat: 48.2065, lon: 16.3656 },
+      { name: "奧地利國家圖書館", lat: 48.2058, lon: 16.3663 },
+    ],
+    meals: { 早: "飯店早餐", 午: "自理（國家圖書館周邊）", 晚: "美泉公園River Park內餐廳（落地窗面對綠地與小河，宮殿行程後看綠意用餐十分療癒）" },
+    hotel: HOTEL_VIENNA,
+    note: "哈布斯堡王朝的冬宮，範圍極大，建議只鎖定西西公主博物館、銀器收藏館、皇家府邸三館精華（走完約1.5–2小時，館內有電梯、無障礙設施完善）。交通可搭地鐵U3線在赫倫巷站下車，步行約5分鐘到米歇爾門；或搭電車1號、2號、D、71號在布克林站下車，穿過英雄廣場即達。體力若還夠，可再加碼奧地利國家圖書館，純粹視覺享受、步行距離極短。"
+  },
+  {
+    n: 11, zh: "瓦豪河谷一日遊・梅爾克修道院", en: "Wachau Valley Day Trip", country: "奧地利", flag: "🇦🇹",
+    spots: [
+      { n: "🌏 瓦豪河谷 Wachau Valley（聯合國教科文組織世界遺產，多瑙河最溫柔的一段）", type: "heritage", links: [{ t: "📍 地圖", u: gmaps("Wachau Valley") }] },
+      { n: "★梅爾克修道院 Melk Abbey（懸立山崖上的金色巴洛克建築，圖書館與旋轉樓梯必看）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Melk Abbey") }] },
+      { n: "★多瑙河遊船（梅爾克到克雷姆斯1.5小時航程，兩岸葡萄園與古堡遺址）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Danube river cruise Melk Krems") }] },
+      { n: "◎杜恩斯坦 Dürnstein（藍白色巴洛克教堂鐘樓，曾囚禁英王獅心王理查）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Dürnstein Austria") }] },
+    ],
+    mapSpots: [
+      { name: "梅爾克修道院 Melk Abbey", lat: 48.2298, lon: 15.3286 },
+      { name: "杜恩斯坦 Dürnstein", lat: 48.3958, lon: 15.5183 },
+      { name: "克雷姆斯 Krems an der Donau", lat: 48.4103, lon: 15.6134 },
+    ],
+    meals: { 早: "飯店早餐", 午: "遊船上自理（推薦點一杯在地白葡萄酒，微醺配多瑙河的風）", 晚: "自理（維也納住處附近小酒館）" },
+    hotel: HOTEL_VIENNA,
+    note: "很多人會問「不去哈修塔特嗎」——哈修塔特湖景美，但來回車程8小時、觀光客多又擁擠，比較像打卡行程。瓦豪河谷離維也納只要1小時，沒有人擠人的急躁，只有棉延的葡萄園、古老修道院、從容流淌的多瑙河。強烈推薦購買 <b>ÖBB 瓦豪河谷套票（約€77／人）</b>，含維也納→梅爾克火車、梅爾克→克雷姆斯遊船、克雷姆斯→維也納火車，以及梅爾克修道院門票，一票到底不用分開買。杜恩斯坦盛產杏桃，記得買一罐手工杏桃果酱回家。"
+  },
+  {
+    n: 12, zh: "美景宮《吻》・維也納國家歌劇院", en: "Belvedere & State Opera", country: "奧地利", flag: "🇦🇹",
+    spots: [
+      { n: "★美景宮上宮 Upper Belvedere（克林姆《吻》真跡，層層金箔在燈光下閃耀）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Upper Belvedere Vienna") }] },
+      { n: "★維也納國家歌劇院（世界知名，也可參加40分鐘中文導覽行程）", type: "optional", links: [{ t: "📍 地圖", u: gmaps("Vienna State Opera") }] },
+    ],
+    mapSpots: [
+      { name: "美景宮 Belvedere", lat: 48.1913, lon: 16.3809 },
+      { name: "維也納國家歌劇院", lat: 48.2035, lon: 16.3691 },
+    ],
+    meals: { 早: "飯店早餐", 午: "自理（午睡前簡單用餐）", 晚: "Anna Sacher 餐廳（薩赫飯店內，全紅絲絨裝潢＋水晶燈＋鋼琴伴奏，就在歌劇院正後方）" },
+    hotel: HOTEL_VIENNA,
+    note: "上午看克林姆的《吻》真跡，站在巨大原畫前那種關於愛與永恒的震撼非常動人。<b>中午吃完飯務必回飯店午睡一小時</b>——晚上的歌劇院行程從入場、中場休息到謝幕通常持續3–4小時，現在的休息是為了晚上的靈魂能跟音樂一起飛揚。若不打算看完整場歌劇，也可以參加40分鐘的中文導覽行程。"
+  },
+  {
+    n: 13, zh: "維也納自由日", en: "Vienna Free Day", country: "奧地利", flag: "🇦🇹",
+    spots: [],
+    meals: { 早: "飯店早餐", 午: "自理", 晚: "自理（巷弄小店尋寶後自由用餐）" },
+    hotel: HOTEL_VIENNA,
+    note: "前六天看過了皇宮的輝煌、聽過了音樂的震撼、品嘗了時光的酒香，今天不安排行程清單，也不設鬧鐘。這份留白是為了消化這幾天的感動——回到最喜歡的地方再坐一坐，或去巷弄裡找一家小小的手工店，為自己挑選一份紀念性的禮物。"
+  },
+  {
+    n: 14, zh: "維也納 → 布達佩斯・Railjet移動日", en: "Vienna → Budapest by Railjet", country: "奧地利→匈牙利", flag: "🇦🇹→🇭🇺",
+    spots: [],
+    mapSpots: [{ name: "布達佩斯佩斯區 Pest", lat: 47.4979, lon: 19.0402 }],
+    meals: { 早: "飯店早餐", 午: "Railjet車上／自理", 晚: "匈牙利牛肉湯 Gulyás（在地小酒館）" },
+    hotel: HOTEL_BUDAPEST,
+    note: "隔天搭上 Railjet 前往多瑙河明珠布達佩斯。布達佩斯分為地勢平坦的佩斯區與丘陵地形的布達區，<b>飯店一定要訂在佩斯區</b>，不用推行李爬坡，主要景點與好吃的餐廳也都在這裡。抵達後在飯店附近散散步，讓身心慢慢適應這座城市的節奏。接下來六天都不用再打包行李了。"
+  },
+  {
+    n: 15, zh: "匈牙利國會大廈・紐約咖啡館", en: "Hungarian Parliament & New York Café", country: "匈牙利", flag: "🇭🇺",
+    spots: [
+      { n: "★匈牙利國會大廈 Hungarian Parliament（多瑙河畔最耀眼的哥德式地標，💰 務必官網提前預約導覽時段）", type: "optional", links: [{ t: "📍 地圖", u: gmaps("Hungarian Parliament Building") }] },
+      { n: "★紐約咖啡館 New York Café（號稱全世界最美咖啡館，天花板壁畫與滿滿金箔裝飾）", type: "star", links: [{ t: "📍 地圖", u: gmaps("New York Cafe Budapest") }] },
+    ],
+    mapSpots: [
+      { name: "匈牙利國會大廈", lat: 47.5070, lon: 19.0458 },
+      { name: "紐約咖啡館 New York Café", lat: 47.5006, lon: 19.0776 },
+    ],
+    meals: { 早: "飯店早餐", 午: "紐約咖啡館下午茶（一走進來會以為自己走進了皇宮）", 晚: "自理" },
+    hotel: HOTEL_BUDAPEST,
+    note: "國會大廈內部導覽非常熱門，<b>千萬別去現場排隊買票</b>——出發前務必先在官網預約好中文或英文導覽時段，時間到了直接從專屬通道進去，把體力省下來好好欣賞美景。首領慢旅的原則：走累了就坐下來，點一杯咖啡、一份甜點，聽著現場演奏的古典樂，這才是歐洲旅行該有的優雅步調。"
+  },
+  {
+    n: 16, zh: "城堡山纜車・漁人堡・多瑙河遊船晚宴", en: "Buda Castle Hill & Danube Cruise", country: "匈牙利", flag: "🇭🇺",
+    spots: [
+      { n: "★城堡山纜車（全世界第二古老的纜車，直達山頂並沿途欣賞多瑙河美景）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Budapest Castle Hill Funicular") }] },
+      { n: "★漁人堡 Fisherman's Bastion（童話城堡般的白色建築，俯瞰對岸國會大厦最佳角度）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Fisherman's Bastion Budapest") }] },
+      { n: "★馬加什教堂 Matthias Church（馬賽克瓷磚屋頂）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Matthias Church Budapest") }] },
+      { n: "★多瑙河遊船晚宴（邊聽導覽邊享用匈牙利料理，經過點燈的國會大廈時震撼到想落淚）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Danube dinner cruise Budapest") }] },
+    ],
+    mapSpots: [
+      { name: "城堡山纜車", lat: 47.4964, lon: 19.0398 },
+      { name: "漁人堡 Fisherman's Bastion", lat: 47.5022, lon: 19.0347 },
+      { name: "馬加什教堂 Matthias Church", lat: 47.5023, lon: 19.0344 },
+    ],
+    meals: { 早: "飯店早餐", 午: "自理（城堡山周邊）", 晚: "多瑙河遊船晚宴（匈牙利料理＋百萬夜景，完全不用走路不用吹風）" },
+    hotel: HOTEL_BUDAPEST,
+    note: "昨天在平坦繁華的佩斯區，今天跨過美麗的鏈橋前往地勢較高的布達區。城堡山下第一個省力秘訣就是搭纜車直上山頂，門票幾歐元絕對值得。漁人堡這裡建議放慢速度，找個角落坐下來拍拍照，路面相對平坦、走起來很舒服。晚上的多瑙河遊船是整趟旅程最期待的行程——只要優雅坐著，世界級的百萬夜景就會在眼前緩緩流過。"
+  },
+  {
+    n: 17, zh: "休養日・塞切尼溫泉・城市公園", en: "Rest Day · Széchenyi Bath & City Park", country: "匈牙利", flag: "🇭🇺",
+    spots: [
+      { n: "★塞切尼溫泉 Széchenyi Thermal Bath（歐洲最大溫泉浴場，皇宮般的黃色建築）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Széchenyi Thermal Bath Budapest") }] },
+      { n: "◎M1地鐵線（歐洲大陸第一條地鐵，已有百年歷史，本身是世界文化遺產）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Budapest Metro Line M1") }] },
+      { n: "◎沃伊達希城堡 Vajdahunyad Castle（羅馬式、哥德式、巴洛克式建築風格集合）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Vajdahunyad Castle Budapest") }] },
+    ],
+    mapSpots: [
+      { name: "塞切尼溫泉 Széchenyi Bath", lat: 47.5186, lon: 19.0824 },
+      { name: "沃伊達希城堡 Vajdahunyad Castle", lat: 47.5167, lon: 19.0817 },
+    ],
+    meals: { 早: "飯店早餐", 午: "自理（城市公園周邊）", 晚: "自理" },
+    hotel: HOTEL_BUDAPEST,
+    note: "連續看了三天壯麗建築，今天是休養生息日。搭乘有百年歷史的黃色<b>M1線</b>地鐵前往城市公園。溫泉水含豐富礦物質，對放鬆肌肉、舒緩關節壓力特別有幫助——提醒已經泡慣日本溫泉的朋友，這裡水池溫度不高、比較像游泳池的感覺，但仍是十分難能可貴的體驗。公園裡地勢十分平坦，散步起來完全不費力，不用趕時間，在湖邊長椅坐坐，靜靜感受在地生活。"
+  },
+  {
+    n: 18, zh: "中央市場・炸麵餅・自由橋", en: "Great Market Hall", country: "匈牙利", flag: "🇭🇺",
+    spots: [
+      { n: "★中央市場 Great Market Hall（被譽為全歐洲最美的市場，室內挑高建築，走道寬敞平坦）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Great Market Hall Budapest") }] },
+      { n: "◎自由橋 Liberty Bridge（綠色鋼橋，河畔吹風散步）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Liberty Bridge Budapest") }] },
+    ],
+    mapSpots: [
+      { name: "中央市場 Great Market Hall", lat: 47.4863, lon: 19.0602 },
+      { name: "自由橋 Liberty Bridge", lat: 47.4839, lon: 19.0588 },
+    ],
+    meals: { 早: "飯店早餐", 午: "中央市場炸麵餅 Lángos（有點像台灣的炸蔥油餅，鋪滿優格與起司，份量大，建議兩人分食一份）", 晚: "自理" },
+    hotel: HOTEL_BUDAPEST,
+    note: "一樓走道寬敞平坦，對膝蓋和體力超級友善，可以找到各式各樣在地農產品；二樓主要是小吃攤和紀念品。今天沒有看什麼壯麗的歷史古蹟，只是像個在地人一樣逛市場、吃小吃、散散步——這就是慢旅的精髓，不再是匆匆過客，而是真正在這個城市生活。"
+  },
+  {
+    n: 19, zh: "聖安德烈藝術家小鎮", en: "Szentendre Day Trip", country: "匈牙利", flag: "🇭🇺",
+    spots: [
+      { n: "★聖安德烈 Szentendre（藝術家小鎮，馬卡龍色房子充滿南歐地中海風情）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Szentendre Hungary") }] },
+    ],
+    mapSpots: [{ name: "聖安德烈 Szentendre", lat: 47.6698, lon: 19.0708 }],
+    meals: { 早: "飯店早餐", 午: "自理（小鎮巷弄餐廳）", 晚: "自理（返回布達佩斯）" },
+    hotel: HOTEL_BUDAPEST,
+    note: "今天依然輕裝出門，只帶一個小包包和水壺。搭乘綠色近郊鐵路 <b>H5線</b>，約40分鐘輕鬆跨出布達佩斯。一出車站就能感覺到這裡空氣和市區完全不一樣，走在充滿藝術氣息的石板路上，每轉一個彎都是一幅美麗的風景。"
+  },
+  {
+    n: 20, zh: "賦歸日・經維也納返台", en: "Homeward via Vienna", country: "匈牙利→台灣", flag: "🇭🇺→🇹🇼",
+    spots: [],
+    meals: { 早: "飯店早餐", 午: "—", 晚: "機上" },
+    hotel: "溫暖的家",
+    note: "因為布達佩斯沒有直飛台灣的航班，最便捷的方式是從布達佩斯東站搭乘 <b>Railjet</b>，大約2.5小時抵達維也納中央車站，同站轉機場快線15分鐘即可抵達維也納機場，再從維也納搭乘直飛班機優雅返回台灣。這20天的中歐慢旅，沒有每天早出晚歸、沒有拖著行李在石板路上崩潰，而是用最適合自己的步調，真正感受了布拉格、維也納、布達佩斯這三座城市的溫度。"
+  },
+];
+
+const dayShoppingMap = {
+  6: [
+    { name: "波希米亞水晶玻璃 Bohemian Crystal", tag: "brand", desc: "捷克百年工藝代表，舊城區周邊專賣店林立，可選購餐具或裝飾品", links: [] },
+    { name: "捷克石榴石 Garnet Jewelry", tag: "souvenir", desc: "捷克國寶級寶石，深紅色澤，銀飾鑲嵌款式最常見", links: [] },
+    { name: "Becherovka 藥草酒", tag: "food", desc: "卡羅維瓦利藥草利口酒，超市與機場免稅店都能買到，是很受歡迎的伴手禮", links: [] },
+  ],
+  13: [
+    { name: "莫札特巧克力球 Mozartkugel", tag: "food", desc: "開心果杏仁膏＋牛軋糖夾心巧克力，維也納經典伴手禮，多家品牌可比較口味", links: [] },
+    { name: "薩赫蛋糕 Sachertorte", tag: "food", desc: "薩赫飯店發明的巧克力蛋糕，可買禮盒裝或現場品嘗", links: [] },
+    { name: "Augarten 維也納瓷器", tag: "brand", desc: "維也納皇室御用瓷器品牌，手繪圖樣精緻，價格不菲但極具紀念價值", links: [] },
+  ],
+  18: [
+    { name: "匈牙利紅椒粉 Paprika", tag: "food", desc: "匈牙利國民香料，中央市場一樓攤位選擇最多，有分甜味與辣味", links: [] },
+    { name: "貴腐甜酒 Tokaji Wine", tag: "food", desc: "世界三大貴腐酒之一，托卡伊產區出品，市場與專賣酒莊都能買到", links: [] },
+    { name: "Herend / Zsolnay 瓷器", tag: "brand", desc: "匈牙利兩大百年瓷器品牌，手繪花紋細膩，是送禮的高檔選擇", links: [] },
+  ],
+};
+
+function renderHotel(hotelStr) {
+  if (!hotelStr || hotelStr.includes('機上') || hotelStr === '溫暖的家' || hotelStr === '—') {
+    return `<span style="color:var(--muted)">${hotelStr}</span>`;
+  }
+  const parts = hotelStr.split('／');
+  return parts.map(part => {
+    part = part.trim();
+    const cleanName = part.replace(/\s*或同級\s*$/, '');
+    return `<a href="${gmaps(cleanName)}" target="_blank" style="color:var(--wine);text-decoration:none;font-size:12px;display:inline-flex;align-items:center;gap:3px">${part}<span style="font-size:10px;opacity:0.7">↗</span></a>`;
+  }).join('<span style="color:var(--hint);margin:0 4px">／</span>');
+}
+
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = days.map((d, i) => {
+    let spotHTML = '';
+    if ((d.spots && d.spots.length) || (d.mapSpots && d.mapSpots.length)) {
+      const items = (d.spots || []).map(s => {
+        const cls = `spot-tag ${s.type}`;
+        const linksHTML = (s.links && s.links.length)
+          ? `<div class="link-row">${s.links.map(l =>
+              `<a class="link-btn${l.o ? ' official' : ''}" href="${l.u}" target="_blank">${l.t} ↗</a>`
+            ).join('')}</div>`
+          : '';
+        return `<div class="spot-item"><span class="${cls}">${s.n}</span>${linksHTML}</div>`;
+      }).join('');
+      const mapDiv = d.mapSpots && d.mapSpots.length
+        ? `<div class="day-map" id="map-day${d.n}"></div>`
+        : '';
+      spotHTML = `<div class="section"><div class="section-label">景點 &amp; 連結</div><div class="spots">${items}</div>${mapDiv}</div>`;
+    }
+
+    const noteHTML = d.note ? `<div class="note">${d.note}</div>` : '';
+
+    let shopHTML = '';
+    const shopItems = dayShoppingMap[d.n];
+    if (shopItems && shopItems.length) {
+      const items = shopItems.map(s => `
+        <div class="shopping-item">
+          <div class="shopping-name"><span class="shopping-tag tag-${s.tag}">${{food:'食',brand:'品牌',souvenir:'紀念'}[s.tag]}</span>${s.name}</div>
+          <div class="shopping-desc">${s.desc}</div>
+          ${s.links && s.links.length ? `<div class="link-row">${s.links.map(l => `<a class="link-btn${l.o ? ' official' : ''}" href="${l.u}" target="_blank">${l.t} ↗</a>`).join('')}</div>` : ''}
+        </div>`).join('');
+      shopHTML = `<div class="shopping-section">
+        <div class="shopping-title">🛒 當地特產 &amp; 購物推薦</div>
+        <div class="shopping-grid">${items}</div>
+      </div>`;
+    }
+
+    return `<div class="day-card">
+      <div class="day-header" onclick="tog(${i})">
+        <span class="day-num">Day ${d.n}</span>
+        <span class="flag">${d.flag}</span>
+        <div class="day-title-wrap">
+          <div class="day-zh">${d.zh}</div>
+          <div class="day-en">${d.en}</div>
+        </div>
+        <span class="day-country">${d.country}</span>
+        <span class="chevron" id="ch${i}">▶</span>
+      </div>
+      <div class="day-body" id="bd${i}">
+        ${spotHTML}
+        <div class="section">
+          <div class="section-label">餐食</div>
+          <div class="meal-row">
+            <div class="meal-item"><span class="meal-label">早</span>${d.meals['早']}</div>
+            <div class="meal-item"><span class="meal-label">午</span>${d.meals['午']}</div>
+            <div class="meal-item"><span class="meal-label">晚</span>${d.meals['晚']}</div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-label">住宿</div>
+          <div class="hotel" style="line-height:1.8">${renderHotel(d.hotel)}</div>
+        </div>
+        ${shopHTML}
+        ${noteHTML}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+const _leafletMaps = {};
+
+function initDayMap(dayN) {
+  const d = days.find(x => x.n === dayN);
+  if (!d || !d.mapSpots || _leafletMaps[dayN]) return;
+  const el = document.getElementById('map-day' + dayN);
+  if (!el) return;
+  const map = L.map(el, { scrollWheelZoom: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  const markers = d.mapSpots.map((s, idx) => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="background:#7a2231;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)">${idx + 1}</div>`,
+      iconSize: [26, 26], iconAnchor: [13, 13]
+    });
+    return L.marker([s.lat, s.lon], { icon }).addTo(map).bindPopup(`<b>${s.name}</b>`);
+  });
+
+  if (d.mapSpots.length > 1) {
+    const routeLatLngs = d.mapSpots.map(s => [s.lat, s.lon]);
+    const routeLine = L.polyline(routeLatLngs, {
+      color: '#7a2231', weight: 3, opacity: 0.6, dashArray: '1 8', lineCap: 'round'
+    }).addTo(map);
+    L.polylineDecorator(routeLine, {
+      patterns: [
+        { offset: '8%', repeat: '16%', symbol: L.Symbol.arrowHead({
+          pixelSize: 11, polygon: false,
+          pathOptions: { stroke: true, weight: 2.5, color: '#7a2231', opacity: 0.85 }
+        }) }
+      ]
+    }).addTo(map);
+  }
+
+  if (markers.length === 1) {
+    map.setView([markers[0].getLatLng().lat, markers[0].getLatLng().lng], 13);
+  } else if (markers.length > 1) {
+    map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [24, 24] });
+  }
+  _leafletMaps[dayN] = map;
+}
+
+function tog(i) {
+  document.getElementById('bd' + i).classList.toggle('open');
+  document.getElementById('ch' + i).classList.toggle('open');
+  const dayN = days[i].n;
+  setTimeout(() => initDayMap(dayN), 50);
+}
+
+render();
+</script>
+</body>
+</html>
