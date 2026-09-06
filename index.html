@@ -156,6 +156,10 @@
   .link-btn.official:hover { background: var(--wine-mid); }
   .link-btn.video { background: #fdeceb; color: #c4302b; border-color: #f3c2bd; }
   .link-btn.video:hover { background: #f3c2bd; }
+  .link-btn.live { background: #e9f7ee; color: #1a7a3d; border-color: #b9e5c8; }
+  .link-btn.live:hover { background: #b9e5c8; }
+  .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #1a7a3d; margin-right: 4px; animation: livepulse 1.6s ease-in-out infinite; }
+  @keyframes livepulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
   .meal-row { display: flex; gap: 16px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
   .meal-item { display: flex; gap: 5px; align-items: flex-start; }
@@ -427,8 +431,8 @@ const days = [
   {
     n: 2, zh: "舊城廣場・天文鐘・帝國咖啡館", en: "Old Town Square & Café Imperial", country: "捷克", flag: "🇨🇿",
     spots: [
-      { n: "★舊城廣場 Old Town Square（石板路平坦好走）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Old Town Square Prague") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=286", v: true }] },
-      { n: "★天文鐘 Astronomical Clock（整點前10分鐘卡位看十二使徒轉動）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Prague Astronomical Clock") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=295", v: true }] },
+      { n: "★舊城廣場 Old Town Square（石板路平坦好走）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Old Town Square Prague") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=286", v: true }, { t: "即時影像", u: "https://www.skylinewebcams.com/en/webcam/czech-republic/prague/prague/old-town.html", live: true }] },
+      { n: "★天文鐘 Astronomical Clock（整點前10分鐘卡位看十二使徒轉動）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Prague Astronomical Clock") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=295", v: true }, { t: "即時影像", u: "https://www.skylinewebcams.com/webcam/czech-republic/prague/prague/prague.html", live: true }] },
       { n: "◎火藥塔 Powder Tower（布拉格古城門遺址）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Powder Tower Prague") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=322", v: true }] },
       { n: "◎市民會館 Municipal House（與火藥塔一黑一白視覺張力強）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Municipal House Prague") }, { t: "官網", u: "https://www.obecnidum.cz/en/", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=333", v: true }] },
       { n: "★帝國咖啡館 Café Imperial（世界十大最美咖啡廳之一，滿牆馬賽克瓷磚）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Cafe Imperial Prague") }, { t: "官網", u: "https://cafeimperial.cz/en/homepage/", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=348", v: true }] },
@@ -461,7 +465,7 @@ const days = [
   {
     n: 4, zh: "體力回補日・清晨查理大橋・遊船", en: "Recovery Day · Charles Bridge & Cruise", country: "捷克", flag: "🇨🇿",
     spots: [
-      { n: "★查理大橋 Charles Bridge（建議早上6–7點造訪，沒有嘈雜攤販，可獨占中世紀浪漫）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Charles Bridge Prague") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=555", v: true }] },
+      { n: "★查理大橋 Charles Bridge（建議早上6–7點造訪，沒有嘈雜攤販，可獨占中世紀浪漫）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Charles Bridge Prague") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=555", v: true }, { t: "即時影像", u: "https://www.skylinewebcams.com/en/webcam/czech-republic/prague/prague/old-town-bridge-tower.html", live: true }] },
       { n: "★伏爾塔瓦河遊船 Vltava River Cruise（坐著看查理大橋拱門從頭頂掠過）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Vltava river cruise dock Prague") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=615", v: true }] },
       { n: "◎小城區 Malá Strana（比舊城區更幽靜、更有文藝氣息）", type: "dot", links: [{ t: "📍 地圖", u: gmaps("Mala Strana Prague") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=642", v: true }] },
       { n: "★Angelato 冰淇淋（號稱布拉格第一，推薦開心果口味，兩球約台幣150元）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Angelato Prague") }, { t: "官網", u: "http://angelato.cz/en/", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=662", v: true }] },
@@ -494,7 +498,7 @@ const days = [
   {
     n: 6, zh: "布拉格城堡・聖維特大教堂・黃金巷", en: "Prague Castle & St. Vitus Cathedral", country: "捷克", flag: "🇨🇿",
     spots: [
-      { n: "★聖維特大教堂 St. Vitus Cathedral（慕夏設計的花窗玻璃，陽光灑進時美到屏息）", type: "star", links: [{ t: "📍 地圖", u: gmaps("St Vitus Cathedral Prague") }, { t: "官網", u: "https://www.katedralasvatehovita.cz", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=885", v: true }] },
+      { n: "★聖維特大教堂 St. Vitus Cathedral（慕夏設計的花窗玻璃，陽光灑進時美到屏息）", type: "star", links: [{ t: "📍 地圖", u: gmaps("St Vitus Cathedral Prague") }, { t: "官網", u: "https://www.katedralasvatehovita.cz", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=885", v: true }, { t: "即時影像", u: "https://www.earthtv.com/en/webcam/prague-charles-bridge", live: true }] },
       { n: "★黃金巷 Golden Lane（曾是煉金術士居所，也是卡夫卡寫作之處）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Golden Lane Prague Castle") }, { t: "官網", u: "https://www.hrad.cz/en", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=919", v: true }] },
     ],
     mapSpots: [
@@ -520,7 +524,7 @@ const days = [
   {
     n: 8, zh: "舊城核心・聖史蒂芬大教堂・中央咖啡館", en: "Stephansdom & Café Central", country: "奧地利", flag: "🇦🇹",
     spots: [
-      { n: "★聖史蒂芬主教座堂 Stephansdom（維也納地標，哈布斯堡雙頭鷲琉璃瓦拼花屋頂）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Stephansdom Vienna") }, { t: "官網", u: "https://www.stephanskirche.at/", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=1190", v: true }] },
+      { n: "★聖史蒂芬主教座堂 Stephansdom（維也納地標，哈布斯堡雙頭鷲琉璃瓦拼花屋頂）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Stephansdom Vienna") }, { t: "官網", u: "https://www.stephanskirche.at/", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=1190", v: true }, { t: "即時影像", u: "https://www.skylinewebcams.com/en/webcam/austria/vienna/vienna/stephansplatz.html", live: true }] },
       { n: "★格拉本大街 Graben（平坦好走，中央黑死病紀念柱必看）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Graben Vienna") }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=1267", v: true }] },
       { n: "★中央咖啡館 Café Central（世界十大最美咖啡館之一，1876年開業，詩人蠟像坐鎮；⚠️ 自2026年3月起整修，暫由分店 DECENTRAL 接待，出發前請上官網確認是否已重新開放）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Cafe Central Vienna") }, { t: "官網", u: "https://cafecentral.wien/en/", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=1301", v: true }] },
     ],
@@ -610,7 +614,7 @@ const days = [
   {
     n: 15, zh: "匈牙利國會大廈・紐約咖啡館", en: "Hungarian Parliament & New York Café", country: "匈牙利", flag: "🇭🇺",
     spots: [
-      { n: "★匈牙利國會大廈 Hungarian Parliament（多瑙河畔最耀眼的哥德式地標，💰 務必官網提前預約導覽時段）", type: "optional", links: [{ t: "📍 地圖", u: gmaps("Hungarian Parliament Building") }, { t: "官方售票", u: "https://jegymester.hu/event-host/900/parlament", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2121", v: true }] },
+      { n: "★匈牙利國會大廈 Hungarian Parliament（多瑙河畔最耀眼的哥德式地標，💰 務必官網提前預約導覽時段）", type: "optional", links: [{ t: "📍 地圖", u: gmaps("Hungarian Parliament Building") }, { t: "官方售票", u: "https://jegymester.hu/event-host/900/parlament", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2121", v: true }, { t: "即時影像", u: "https://www.earthtv.com/en/webcam/budapest-chain-bridge", live: true }] },
       { n: "★紐約咖啡館 New York Café（號稱全世界最美咖啡館，天花板壁畫與滿滿金箔裝飾）", type: "star", links: [{ t: "📍 地圖", u: gmaps("New York Cafe Budapest") }, { t: "官網", u: "https://www.newyorkcafe.hu", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2166", v: true }] },
     ],
     mapSpots: [
@@ -624,10 +628,10 @@ const days = [
   {
     n: 16, zh: "城堡山纜車・漁人堡・多瑙河遊船晚宴", en: "Buda Castle Hill & Danube Cruise", country: "匈牙利", flag: "🇭🇺",
     spots: [
-      { n: "★城堡山纜車（全世界第二古老的纜車，直達山頂並沿途欣賞多瑙河美景）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Budapest Castle Hill Funicular") }, { t: "官網", u: "https://siklojegy.hu/en", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2213", v: true }] },
+      { n: "★城堡山纜車（全世界第二古老的纜車，直達山頂並沿途欣賞多瑙河美景）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Budapest Castle Hill Funicular") }, { t: "官網", u: "https://siklojegy.hu/en", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2213", v: true }, { t: "即時影像", u: "https://www.skylinewebcams.com/en/webcam/hungary/budapest/budapest/buda-castle.html", live: true }] },
       { n: "★漁人堡 Fisherman's Bastion（童話城堡般的白色建築，俯瞰對岸國會大厦最佳角度）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Fisherman's Bastion Budapest") }, { t: "官網", u: "https://www.fishermansbastion.com", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2234", v: true }] },
       { n: "★馬加什教堂 Matthias Church（馬賽克瓷磚屋頂）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Matthias Church Budapest") }, { t: "官網", u: "https://www.matyas-templom.hu", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2263", v: true }] },
-      { n: "★多瑙河遊船晚宴（邊聽導覽邊享用匈牙利料理，經過點燈的國會大廈時震撼到想落淚）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Danube dinner cruise Budapest") }, { t: "官網", u: "https://legenda.hu/en", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2293", v: true }] },
+      { n: "★多瑙河遊船晚宴（邊聽導覽邊享用匈牙利料理，經過點燈的國會大廈時震撼到想落淚）", type: "star", links: [{ t: "📍 地圖", u: gmaps("Danube dinner cruise Budapest") }, { t: "官網", u: "https://legenda.hu/en", o: true }, { t: "▶ 影片", u: "https://youtu.be/FgxEBFhzhaM?t=2293", v: true }, { t: "即時影像", u: "https://www.earthtv.com/en/webcam/budapest-chain-bridge", live: true }] },
     ],
     mapSpots: [
       { name: "城堡山纜車", lat: 47.4964, lon: 19.0398 },
@@ -725,7 +729,7 @@ function render() {
         const cls = `spot-tag ${s.type}`;
         const linksHTML = (s.links && s.links.length)
           ? `<div class="link-row">${s.links.map(l =>
-              `<a class="link-btn${l.v ? ' video' : (l.o ? ' official' : '')}" href="${l.u}" target="_blank">${l.t}${l.v ? '' : ' ↗'}</a>`
+              `<a class="link-btn${l.live ? ' live' : (l.v ? ' video' : (l.o ? ' official' : ''))}" href="${l.u}" target="_blank">${l.live ? '<span class="live-dot"></span>' : ''}${l.t}${(l.v || l.live) ? '' : ' ↗'}</a>`
             ).join('')}</div>`
           : '';
         return `<div class="spot-item"><span class="${cls}">${s.n}</span>${linksHTML}</div>`;
