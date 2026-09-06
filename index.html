@@ -118,6 +118,7 @@
   .hotel-tier:last-child { margin-bottom: 0; }
   .hotel-tier .name { font-size: 13px; font-weight: 500; color: var(--text); }
   .hotel-tier .desc { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.6; }
+  .hotel-map { width: 100%; height: 130px; border-radius: 8px; margin-top: 8px; display: block; background: #f0ede8; }
 
   .day-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.2s; }
   .day-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
@@ -234,7 +235,7 @@
 <!-- 飯店選擇 -->
 <div class="info-card">
   <div class="inner">
-    <div class="info-head" style="background:var(--gold)" onclick="var b=document.getElementById('hotelb');var c=document.getElementById('hotelc');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'rotate(90deg)':''">
+    <div class="info-head" style="background:var(--gold)" onclick="var b=document.getElementById('hotelb');var c=document.getElementById('hotelc');b.classList.toggle('open');c.style.transform=b.classList.contains('open')?'rotate(90deg)':'';loadHotelMaps();">
       <div>
         <div class="info-head-title">🏨 三城飯店選擇（各 3 個價位參考）</div>
         <div class="info-head-sub">原則：離舊城區不遠，但不住最吵的觀光心臟地帶</div>
@@ -243,24 +244,32 @@
     </div>
     <div class="info-body" id="hotelb">
       <div class="section-title">🇨🇿 布拉格（7 晚）</div>
-      <div class="hotel-tier"><div class="name">布拉格大都會飯店</div><div class="desc">五星精品，位於安靜小巷，遠離舊城廣場喧囂但步行仍快速，床墊與隔音評價高，重視睡眠品質的首選</div></div>
-      <div class="hotel-tier"><div class="name">克萊門特飯店</div><div class="desc">溫馨四星，距伏爾塔瓦河僅幾步，員工友善、樂於分享在地建議，早餐評價高</div></div>
-      <div class="hotel-tier"><div class="name">布拉格一號飯店</div><div class="desc">三星連鎖但硬體品質穩定，樓下有超市與藥妝店，走路 5 分鐘到巴士總站和火車站，CP 值高</div></div>
+      <div class="hotel-tier"><div class="name">布拉格大都會飯店</div><div class="desc">五星精品，位於安靜小巷，遠離舊城廣場喧囂但步行仍快速，床墊與隔音評價高，重視睡眠品質的首選</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=%E5%B8%83%E6%8B%89%E6%A0%BC%E5%A4%A7%E9%83%BD%E6%9C%83%E9%A3%AF%E5%BA%97%20Prague" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=%E5%B8%83%E6%8B%89%E6%A0%BC%E5%A4%A7%E9%83%BD%E6%9C%83%E9%A3%AF%E5%BA%97%20Prague&output=embed" loading="lazy" style="border:0"></iframe></div>
+      <div class="hotel-tier"><div class="name">克萊門特飯店</div><div class="desc">溫馨四星，距伏爾塔瓦河僅幾步，員工友善、樂於分享在地建議，早餐評價高</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=%E5%85%8B%E8%90%8A%E9%96%80%E7%89%B9%E9%A3%AF%E5%BA%97%20Prague" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=%E5%85%8B%E8%90%8A%E9%96%80%E7%89%B9%E9%A3%AF%E5%BA%97%20Prague&output=embed" loading="lazy" style="border:0"></iframe></div>
+      <div class="hotel-tier"><div class="name">布拉格一號飯店</div><div class="desc">三星連鎖但硬體品質穩定，樓下有超市與藥妝店，走路 5 分鐘到巴士總站和火車站，CP 值高</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=%E5%B8%83%E6%8B%89%E6%A0%BC%E4%B8%80%E8%99%9F%E9%A3%AF%E5%BA%97%20Prague" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=%E5%B8%83%E6%8B%89%E6%A0%BC%E4%B8%80%E8%99%9F%E9%A3%AF%E5%BA%97%20Prague&output=embed" loading="lazy" style="border:0"></iframe></div>
 
       <div class="section-title">🇦🇹 維也納（7 晚）</div>
-      <div class="hotel-tier"><div class="name">維也納無憂宮飯店</div><div class="desc">位於博物館區旁、第一區邊界，避開最擁擠的購物人潮，附設室內泳池與 SPA，適合下午回房做水療恢復體力</div></div>
-      <div class="hotel-tier"><div class="name">凱薩霍夫飯店</div><div class="desc">質感與服務優、價格更親民，早餐評價高</div></div>
-      <div class="hotel-tier"><div class="name">維也納國家劇院一號飯店</div><div class="desc">設計現代、交通方便，性價比高的選擇</div></div>
+      <div class="hotel-tier"><div class="name">維也納無憂宮飯店</div><div class="desc">位於博物館區旁、第一區邊界，避開最擁擠的購物人潮，附設室內泳池與 SPA，適合下午回房做水療恢復體力</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=%E7%B6%AD%E4%B9%9F%E7%B4%8D%E7%84%A1%E6%86%82%E5%AE%AE%E9%A3%AF%E5%BA%97%20Vienna" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=%E7%B6%AD%E4%B9%9F%E7%B4%8D%E7%84%A1%E6%86%82%E5%AE%AE%E9%A3%AF%E5%BA%97%20Vienna&output=embed" loading="lazy" style="border:0"></iframe></div>
+      <div class="hotel-tier"><div class="name">凱薩霍夫飯店</div><div class="desc">質感與服務優、價格更親民，早餐評價高</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=%E5%87%B1%E8%96%A9%E9%9C%8D%E5%A4%AB%E9%A3%AF%E5%BA%97%20Vienna" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=%E5%87%B1%E8%96%A9%E9%9C%8D%E5%A4%AB%E9%A3%AF%E5%BA%97%20Vienna&output=embed" loading="lazy" style="border:0"></iframe></div>
+      <div class="hotel-tier"><div class="name">維也納國家劇院一號飯店</div><div class="desc">設計現代、交通方便，性價比高的選擇</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=%E7%B6%AD%E4%B9%9F%E7%B4%8D%E5%9C%8B%E5%AE%B6%E5%8A%87%E9%99%A2%E4%B8%80%E8%99%9F%E9%A3%AF%E5%BA%97%20Vienna" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=%E7%B6%AD%E4%B9%9F%E7%B4%8D%E5%9C%8B%E5%AE%B6%E5%8A%87%E9%99%A2%E4%B8%80%E8%99%9F%E9%A3%AF%E5%BA%97%20Vienna&output=embed" loading="lazy" style="border:0"></iframe></div>
 
       <div class="section-title">🇭🇺 布達佩斯（6 晚）</div>
-      <div class="hotel-tier"><div class="name">DA Hotel</div><div class="desc">位於市中心，走到多瑙河僅 2 分鐘，房間乾淨、設計現代，高 CP 值，適合把預算留給美食的旅客</div></div>
-      <div class="hotel-tier"><div class="name">Hotel Moments Budapest</div><div class="desc">中價位高質感，位在有「布達佩斯香榭大道」之稱的安德拉什大街上，建築本身就是古蹟，早餐豐富</div></div>
-      <div class="hotel-tier"><div class="name">Aria Hotel Budapest</div><div class="desc">音樂主題五星精品，頂樓酒吧可眺望聖史蒂芬教堂，適合周年紀念或犒賞自己</div></div>
+      <div class="hotel-tier"><div class="name">DA Hotel</div><div class="desc">位於市中心，走到多瑙河僅 2 分鐘，房間乾淨、設計現代，高 CP 值，適合把預算留給美食的旅客</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=DA%20Hotel%20Budapest" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=DA%20Hotel%20Budapest&output=embed" loading="lazy" style="border:0"></iframe></div>
+      <div class="hotel-tier"><div class="name">Hotel Moments Budapest</div><div class="desc">中價位高質感，位在有「布達佩斯香榭大道」之稱的安德拉什大街上，建築本身就是古蹟，早餐豐富</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=Hotel%20Moments%20Budapest" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=Hotel%20Moments%20Budapest&output=embed" loading="lazy" style="border:0"></iframe></div>
+      <div class="hotel-tier"><div class="name">Aria Hotel Budapest</div><div class="desc">音樂主題五星精品，頂樓酒吧可眺望聖史蒂芬教堂，適合周年紀念或犒賞自己</div><div class="link-row" style="margin-top:6px"><a class="link-btn official" href="https://www.google.com/maps/search/?api=1&query=Aria%20Hotel%20Budapest" target="_blank">📍 地圖 ↗</a></div><iframe class="hotel-map" data-src="https://maps.google.com/maps?q=Aria%20Hotel%20Budapest&output=embed" loading="lazy" style="border:0"></iframe></div>
 
       <div style="font-size:11px;color:var(--hint);margin-top:10px;line-height:1.6">三城飯店都建議定在市中心平坦區域：布拉格舊城區周邊、維也納第一區內城區、布達佩斯地勢平坦的佩斯區——不用推行李爬坡，主要景點與餐廳都在步行範圍內。</div>
     </div>
   </div>
 </div>
+
+<script>
+function loadHotelMaps() {
+  document.querySelectorAll('.hotel-map').forEach(function(f) {
+    if (!f.src && f.dataset.src) f.src = f.dataset.src;
+  });
+}
+</script>
 
 <!-- 交通攻略 -->
 <div class="info-card">
